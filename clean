@@ -1,0 +1,5 @@
+rm -f socket_dump
+rm -f checksum_test
+rm -f lrw.so
+rm -f src/*.o
+rm -f src/config.h
