@@ -10,14 +10,20 @@
 #include "config.h"
 
 #include "capture.h"
+#include "pcap.h"
 
-int lrw_capture_new   (lua_State * L);
-int lrw_capture_recv  (lua_State * L);
-int lrw_capture_send  (lua_State * L);
-int lrw_capture_gc    (lua_State * L);
+int lrw_capture_new  (lua_State * L);
+int lrw_capture_recv (lua_State * L);
+int lrw_capture_send (lua_State * L);
+int lrw_capture_gc   (lua_State * L);
+
+int lrw_pcap_new  (lua_State * L);
+int lrw_pcap_recv (lua_State * L);
+int lrw_pcap_gc   (lua_State * L);
 
 struct _capture * lrw_capture_check (lua_State * L, int position);
-struct _packet * lrw_packet_check   (lua_State * L, int position);
+struct _packet *  lrw_packet_check  (lua_State * L, int position);
+struct _pcap *    lrw_pcap_check    (lua_State * L, int position);
 
 int lrw_packet_new            (lua_State * L);
 int lrw_packet_raw            (lua_State * L);

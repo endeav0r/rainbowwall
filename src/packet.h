@@ -14,7 +14,7 @@
  * 1518 in ETH_FRAME_LEN).
  * this will greatly affect memory usage from lua.
  */
-// YES, I am seeing packet sizes of 15994 bytes on the wire at USMA
+
 #define RW_PACKET_FRAME_LEN    16000
 
 // all of the below constants should be unique and non-zero
@@ -34,10 +34,12 @@
                                      
 /* RW_PACKET_ERR_ RANGE VALUES RESERVED
  * These error values are to be used by the respective modules only
+ * -500  through -999  for capture
  * -1000 through -1999 for trans
  * -2000 through -2999 for net
  * -3000 through -3999 for icmp
  * -4000 through -4999 for tcp_streams
+ * -5000 through -5999 for pcap
  */
 
 #define RW_PACKET_IPV4     4

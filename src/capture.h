@@ -5,9 +5,9 @@
 
 #include <linux/if_packet.h>
 
-#define RW_CAPTURE_ERR_SOCKFAIL   -1 /* failed to create socket */
-#define RW_CAPTURE_ERR_BIND_IFACE -2 /* failed to bind sock to interface */
-#define RW_CAPTURE_ERR_FIND_IFACE -3 /* failed to find interface */
+#define RW_CAPTURE_ERR_SOCKFAIL   -500 /* failed to create socket */
+#define RW_CAPTURE_ERR_BIND_IFACE -501 /* failed to bind sock to interface */
+#define RW_CAPTURE_ERR_FIND_IFACE -502 /* failed to find interface */
 
 struct _capture {
     int sock;

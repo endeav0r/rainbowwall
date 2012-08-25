@@ -23,6 +23,19 @@ static const struct luaL_Reg lrw_capture_lib_m [] = {
 };
 
 
+static const struct luaL_Reg lrw_pcap_lib_f [] = {
+    {"new", lrw_pcap_new},
+    {NULL, NULL}
+};
+
+
+static const struct luaL_Reg lrw_pcap_lib_m [] = {
+    {"__gc", lrw_pcap_gc},
+    {"recv", lrw_pcap_recv},
+    {NULL, NULL}
+};
+
+
 static const struct luaL_Reg lrw_packet_lib_f [] = {
     {"new", lrw_packet_new},
     {NULL, NULL}
@@ -57,16 +70,20 @@ static const struct luaL_Reg lrw_packet_lib_m [] = {
 
 
 LUALIB_API int luaopen_lrw (lua_State * L)
-{   
-    if (getuid() != 0)
-        luaL_error(L, "trying to run lrw as a user other than root!");
-    
+{
     luaL_newmetatable(L, "lrw.rw_capture_t");
     lua_pushstring   (L, "__index");
     lua_pushvalue    (L, -2);
     lua_settable     (L, -3);
     luaL_register    (L, NULL, lrw_capture_lib_m);
     luaL_register    (L, "lrw_capture_t", lrw_capture_lib_f);
+    
+    luaL_newmetatable(L, "lrw.rw_pcap_t");
+    lua_pushstring   (L, "__index");
+    lua_pushvalue    (L, -2);
+    lua_settable     (L, -3);
+    luaL_register    (L, NULL, lrw_pcap_lib_m);
+    luaL_register    (L, "lrw_pcap_t", lrw_pcap_lib_f);
     
     luaL_newmetatable(L, "lrw.rw_packet_t");
     lua_pushstring   (L, "__index");
@@ -77,6 +94,10 @@ LUALIB_API int luaopen_lrw (lua_State * L)
     
     return 2;
 }
+
+/*****************
+* CAPTURE_T
+*****************/
 
 
 struct _capture * lrw_capture_check (lua_State * L, int position)
@@ -93,6 +114,9 @@ int lrw_capture_new (lua_State * L)
 {
     int error;
     struct _capture * capture;
+
+    if (getuid() != 0)
+        luaL_error(L, "trying to create capture_t as a user other than root!");
     
     const char * interface;
     
@@ -184,6 +208,104 @@ int lrw_capture_gc (lua_State * L)
     
     return 0;
 }
+
+
+
+/*****************
+* PCAP_T
+*****************/
+
+struct _pcap * lrw_pcap_check (lua_State * L, int position)
+{
+    struct _pcap * pcap;
+    void * userdata = luaL_checkudata(L, position, "lrw.rw_pcap_t");
+    luaL_argcheck(L, userdata != NULL, position, "lrw.rw_pcap_t expected");
+    pcap = (struct _pcap *) userdata;
+    return pcap;
+}
+
+
+int lrw_pcap_new (lua_State * L)
+{
+    int error;
+    struct _pcap * pcap;
+    
+    const char * filename;
+    
+    if (lua_isstring(L, 1)) {
+        filename = luaL_checkstring(L, 1);
+        lua_pop(L, 1);
+    }
+    else {
+        luaL_error(L, "pcap_t new expects string as first argument");
+    }
+    
+    pcap = lua_newuserdata(L, sizeof(struct _pcap));
+    luaL_getmetatable(L, "lrw.rw_pcap_t");
+    lua_setmetatable(L, -2); 
+    
+    error = rw_pcap_init(pcap, filename);
+    switch (error) {
+    case RW_PCAP_ERR :
+        luaL_error(L, "RW_PCAP_ERR");
+        break;
+    }
+    
+    return 1;
+}
+
+
+int lrw_pcap_recv  (lua_State * L)
+{
+    struct _pcap * pcap;
+    struct _packet  * packet;
+    int error;
+    
+    pcap = lrw_pcap_check(L,-1);
+    lua_pop(L, 1);
+    
+    lrw_packet_new(L);
+    packet = lrw_packet_check(L, -1);
+    
+    error = rw_pcap_recv(pcap, packet);
+    
+    switch (error) {
+    case RW_PCAP_ERR :
+        luaL_error(L, "RW_PCAP_ERR");
+        break;
+    case RW_PCAP_EOF :
+        luaL_error(L, "RW_PCAP_EOF");
+        break;
+    case RW_PACKET_ERR_SIZE :
+        luaL_error(L, "RW_PACKET_ERR_SIZE");
+        break;
+    case RW_PACKET_ERR_NET :
+        luaL_error(L, "RW_PACKET_ERR_NET");
+        break;
+    }
+    
+    return 1;
+}
+
+
+int lrw_pcap_gc (lua_State * L)
+{
+    struct _pcap * pcap;
+    
+    pcap = lrw_pcap_check(L, 1);
+    
+    lua_pop(L, 1);
+    
+    rw_pcap_destroy(pcap);
+    
+    return 0;
+}
+
+
+
+/*****************
+* PACKET_T
+*****************/
 
 
 struct _packet * lrw_packet_check (lua_State * L, int position)

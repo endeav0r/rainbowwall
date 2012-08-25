@@ -42,7 +42,7 @@ fh = io.open('src/config.h', 'w')
 fh:write(table.concat(HEADER_PATHS, '\n'))
 fh:close()
 
-deps = {'packet', 'net', 'trans', 'arp', 'icmp', 'capture'}
+deps = {'packet', 'net', 'trans', 'arp', 'icmp', 'capture', 'pcap'}
 dep_objs = {}
 
 for di, dep in pairs(deps) do
@@ -50,11 +50,11 @@ for di, dep in pairs(deps) do
     table.insert(dep_objs, 'src/' .. dep .. '.o')
 end
 
-execute("gcc -O2 -Wall src/socket_dump.c -o socket_dump " .. 
+execute("gcc -O2 -Wall -lpcap src/socket_dump.c -o socket_dump " .. 
         table.concat(dep_objs, " "))
         
-execute("gcc -O2 -Wall src/checksum_test.c -o checksum_test " .. 
+execute("gcc -O2 -Wall -lpcap src/checksum_test.c -o checksum_test " .. 
         table.concat(dep_objs, " "))
 
-execute("gcc -O2 -shared -fpic -o lrw.so src/lrw.c -llua " .. 
+execute("gcc -O2 -shared -lpcap -fpic -o lrw.so src/lrw.c -llua " .. 
         table.concat(dep_objs, " "))
