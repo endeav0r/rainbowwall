@@ -56,5 +56,5 @@ execute("gcc -O2 -Wall -lpcap src/socket_dump.c -o socket_dump " ..
 execute("gcc -O2 -Wall -lpcap src/checksum_test.c -o checksum_test " .. 
         table.concat(dep_objs, " "))
 
-execute("gcc -O2 -shared -lpcap -fpic -o lrw.so src/lrw.c -llua " .. 
+execute("gcc -O2 -shared -lpcap -fpic -o lrw.so src/lrw.c -lluajit-5.1 " .. 
         table.concat(dep_objs, " "))
