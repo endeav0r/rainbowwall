@@ -38,9 +38,10 @@ for filename, paths in pairs(HEADERS) do
     end
 end
 
-fh = io.open('src/config.h', 'w')
-fh:write(table.concat(HEADER_PATHS, '\n'))
-fh:close()
+-- no more
+--fh = io.open('src/config.h', 'w')
+--fh:write(table.concat(HEADER_PATHS, '\n'))
+--fh:close()
 
 deps = {'packet', 'net', 'trans', 'arp', 'icmp', 'capture', 'pcap'}
 dep_objs = {}
